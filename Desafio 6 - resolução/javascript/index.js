@@ -20,11 +20,11 @@ bot.on('message', async (msg) => {
 	const chatMessage = msg.text.trim().toLowerCase();
 	const chatId = msg.chat.id;
 
-    // Save data of user 
+	// Save data of user 
 	// Write data in 'username.txt' . 
-    fs.appendFile('./javascript/conversations/' + msg.chat.username + '_' + chatId + '.txt', chatMessage + ' ', (err) => { 
-       // In case of a error throw err. 
-       if (err) throw err; 
+	fs.appendFile('./javascript/conversations/' + msg.chat.username + '_' + chatId + '.txt', chatMessage + ' ', (err) => { 
+		// In case of a error throw err. 
+		if (err) throw err; 
 	}); 
 	
 	if (chatMessage.startsWith('ola') || chatMessage.startsWith('oi')) {
