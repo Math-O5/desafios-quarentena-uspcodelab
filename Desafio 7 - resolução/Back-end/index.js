@@ -6,6 +6,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 const messages = [];
+const users = [];
 
 app.use(cors());
 app.use(express.json());

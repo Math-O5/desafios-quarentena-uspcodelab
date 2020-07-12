@@ -5,6 +5,8 @@ const messageTemplateElem = document.getElementById('message-template');
 const userInfoElem = document.querySelector('#info-user-container div');
 const userButtonElem = document.querySelector('#info-user-container form');
 
+const usersNow = [];
+
 /**
 * @typedef {{
 	text: string,
@@ -45,9 +47,19 @@ myself = (() => {
 		setInfoUser(parseMyself);
 		return parseMyself;
 	}
+
+	const name = `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`;
+	const color = randomItemFromArray(colors);
+	
+	// Bonus 2: Garante que novo usuario não tem um nome repetido.
+	while(usersNow[name] != null) {
+		name = `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`;
+		usersNow[name] = color
+	}
+
 	const newMyself = {
-		name: `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`,
-		color: randomItemFromArray(colors),
+		name: name,
+		color: color,
 	}
 
 	localStorage.setItem('self-info', JSON.stringify(newMyself));
@@ -82,10 +94,16 @@ function setInfoUser(myself) {
 
 userButtonElem.addEventListener('submit', event => {
 	event.preventDefault();
-	const newMyself = {
-		name: `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`,
-		color: randomItemFromArray(colors),
+	
+	const name = `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`;
+	const color = randomItemFromArray(colors);
+	
+	// Bonus 2: Garante que novo usuario não tem um nome repetido.
+	while(usersNow[name] != null) {
+		name = `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`;
+		usersNow[name] = color
 	}
+
 	localStorage.setItem('self-info', JSON.stringify(newMyself));
 	window.location.reload();
 });
