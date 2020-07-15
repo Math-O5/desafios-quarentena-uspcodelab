@@ -34,11 +34,12 @@ main {
 #info-user-container {
 	margin: 0;
 	padding: 0;
-	width: 200px;
+	width: 19%;
 	background-color: #cdf5e1;
 	position: fixed;
 	height: 100%;
 	overflow: none;
+	font-size: large;
   }
 
   #info-user-container button {
@@ -51,7 +52,7 @@ main {
 #messages-container {
 	height: 80%;
 	overflow-y: auto;
-	margin-left: 250px;
+	margin-left: 20%;
 	padding: 4px 2px;
 	display: flex;
 	flex-direction: column;
@@ -61,10 +62,9 @@ main {
 #message-form {
 	border-top: 1px solid black;
 	display: flex;
-	margin-left: 220px;
+	margin-left: 20%;
 	padding: 10px 0px;
 	overflow-y: none;
-
 }
 
 #message-form > input{
@@ -84,7 +84,7 @@ main {
 	max-width: 75%;
 	width: max-content;
 	margin: 0px 0;
-	padding: 4px 2px;
+	padding: 10px 5px;
 	overflow-y: none;
 
 }

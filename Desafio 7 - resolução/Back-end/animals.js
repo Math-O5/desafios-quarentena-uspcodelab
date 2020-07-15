@@ -1,4 +1,4 @@
-const animals = [
+module.exports = [
 	'Aardvark',
 	'Abyssinian',
 	'Adelie Penguin',
