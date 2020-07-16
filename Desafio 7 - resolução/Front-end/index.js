@@ -210,4 +210,5 @@ async function fetchMessagesFromServer () {
 	});
 }
 
+// Checa se há novas mensagens
 setInterval(fetchMessagesFromServer, 500);

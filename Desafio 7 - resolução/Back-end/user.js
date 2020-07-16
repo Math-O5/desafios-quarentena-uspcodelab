@@ -44,20 +44,22 @@ async function load() {
     
         // carrega todas mensagens anteriores
         messages.forEach((message) => {
-            const segMessage = message.split('-');
-            messagesStored.push({
-                id: segMessage[0],
-                date: segMessage[1],
-                fromuser: segMessage[2],
-                color: segMessage[3],
-                content: segMessage[4],
-            });
-          
-            // Carrega usuário
-            if(!username.includes(segMessage[2])) {
-                username.push(segMessage[2]);
-                colors.push(segMessage[3]);
-            }      
+            if(message !== '') {
+                const segMessage = message.split('-');
+                messagesStored.push({
+                    id: segMessage[0],
+                    date: segMessage[1],
+                    fromuser: segMessage[2],
+                    color: segMessage[3],
+                    content: segMessage[4],
+                });
+              
+                // Carrega usuário
+                if(!username.includes(segMessage[2])) {
+                    username.push(segMessage[2]);
+                    colors.push(segMessage[3]);
+                }      
+            }
         });
     });
 }
