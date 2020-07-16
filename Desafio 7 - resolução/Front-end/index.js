@@ -5,7 +5,6 @@ const messageTemplateElem = document.getElementById('message-template');
 const userInfoElem = document.querySelector('#info-user-container div');
 const userButtonElem = document.querySelector('#info-user-container form');
 
-const usersNow = [];
 const monthNames = ["January", "February", "March", "April", "May", "June",
 "July", "August", "September", "October", "November", "December"];
 
@@ -37,43 +36,40 @@ function randomItemFromArray (arr) {
 	return arr[Math.floor(Math.random() * arr.length)];
 }
 
-myself = (() => {
+let myself;
 
+(async() => {
 	// This part is to store the "self" into the localstorage. This is to allow for
 	// the user to come back as themselves later.
 	// The localstorage save info session in the broswer of the user.
 	// https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
-	const myself = localStorage.getItem('self-info');
-	if (myself) {
-		parseMyself =  JSON.parse(myself);
+	const myselfSession = localStorage.getItem('self-info');
+	if (myselfSession) {
+		parseMyself = JSON.parse(myselfSession);
 		setInfoUser(parseMyself);
-		return parseMyself;
+		myself = parseMyself;
+		return;
 	}
 
-	const name = `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`;
-	const color = randomItemFromArray(colors);
-	
-	// Bonus 2: Garante que novo usuario não tem um nome repetido.
-	while(usersNow[name] != null) {
-		name = `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`;
-		usersNow[name] = color
+	try {
+		const response =  await fetch(`${serverAddress}/user`, {
+			 								headers: { 'Content-Type': 'application/json' },
+										});
+										
+		const newMyself = await response.json();
+		localStorage.setItem('self-info', JSON.stringify(newMyself));
+		console.log('new user', newMyself);
+		setInfoUser(newMyself);
+		myself = newMyself;
+	} catch(e) {
+		console.log('Error ao  trocar nome e cor\n', e);
 	}
-
-	const newMyself = {
-		name: name,
-		color: color,
-	}
-
-	localStorage.setItem('self-info', JSON.stringify(newMyself));
-
-	setInfoUser(newMyself);
-	return newMyself;
 })();
 
 
 /**
  * Calcula a data e format MM DD, YYYY
- * @returns { string } The actual date
+ * @returns { string } Date from now
  */
 function answerDate() {
     let date  = new Date();
@@ -93,40 +89,54 @@ function answerDate() {
 messageFormElement.addEventListener('submit', event => {
 	event.preventDefault();
 
-	const data = answerDate();
+	// Data no formato DD/MM/AA
+	const date = answerDate();
 	
 	// Selects the input from the form
 	const messageElement = messageFormElement.querySelector('input[name=message-value]');
 	const messageText = messageElement.value;
 	if (!messageText) return;
-	const message = { text: messageText, sender: myself, when: data };
-	console.log(data);
+
+	// Envia mensagem
+	const message = { 
+		content: messageText, 
+		fromuser: myself.name, 
+		color: myself.color, 
+		date: date 
+	};
 	sendMessageToServer(message);
 
 	// Clears the message text input
 	messageElement.value = '';
 });
 
-function setInfoUser(myself) {
-	console.log(myself);
-	userInfoElem.innerHTML = `Ùser: ${myself.name} Color: ${myself.color}`;
-}
-
-userButtonElem.addEventListener('submit', event => {
+/**
+ * Cria um novo usuário, atualiza as informações e recarrega a página.
+ */
+userButtonElem.addEventListener('submit', async(event) => {
 	event.preventDefault();
-	
-	const name = `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`;
-	const color = randomItemFromArray(colors);
-	
-	// Bonus 2: Garante que novo usuario não tem um nome repetido.
-	while(usersNow[name] != null) {
-		name = `${randomItemFromArray(adjectives)} ${randomItemFromArray(animals)}`;
-		usersNow[name] = color
+	try {
+		const response =  await fetch(`${serverAddress}/user`, {
+			headers: {'Content-Type': 'application/json'},
+		});
+		const newMyself = await response.json();
+		myself = newMyself;
+		//setInfoUser(newMyself);
+		localStorage.setItem('self-info', JSON.stringify(newMyself));
+		window.location.reload();
+	} catch(e) {
+		console.log('Error ao  trocar nome e cor\n', e);
 	}
-
-	localStorage.setItem('self-info', JSON.stringify(newMyself));
-	window.location.reload();
 });
+
+/**
+ * 
+ * @param { JSON } myself {name, color}
+ * Atualiza as informações no panel esquerdo. 
+ */
+function setInfoUser(myself) {
+	userInfoElem.innerHTML = `<h2>Ùser:</h2> ${myself.name} <h3>Color:</h3><p>${myself.color}</p>`;
+}
 
 /**
 * @argument { Message } message
@@ -145,24 +155,25 @@ async function sendMessageToServer (message) {
 }
 
 /**
-* @argument { Message } message
-* Create the label where the user read the message.
-*/
+ * @argument { Message } message
+ * Create the label where the user read the message.
+ */
 function createMessageOnUI (message) {
 	const messageNode = messageTemplateElem.content.cloneNode(true);
 	const messageContainerElement = messageNode.querySelector('.message-container');
 	const messageNameElement = messageNode.querySelector('.message-name');
 	const messageTextElement = messageNode.querySelector('.message-text');
-
-	messageNameElement.innerHTML = '<p>' + message.when + '</p>' + ' ' + '<h3>' + message.sender.name + '<\h3>';
-	messageNameElement.style.color = message.sender.color;
-	messageTextElement.innerText = message.text;
+	
+	messageContainerElement.setAttribute("id", message.id);
+	messageNameElement.innerHTML = '<p>' +  message.date + '</p>' + ' ' + '<h3>' + message.fromuser + '<\h3>';
+	messageNameElement.style.color = message.color;
+	messageTextElement.innerText = message.content;	
 
 	// If I was the sender, push the message element to the right
-	if (message.sender.name === myself.name) {
+	if (message.fromuser === myself.name) {
 		messageContainerElement.style.marginLeft = 'auto';
 	}
-
+	
 	messagesContainerElem.appendChild(messageNode);
 }
 
@@ -170,8 +181,10 @@ function createMessageOnUI (message) {
  * This update all message from the server./
  */
 async function fetchMessagesFromServer () {
+	if(!myself) return;
+	
 	/** @type { Message[] } */
-	let data;
+	let data = [];
 	try {
 		// Note that, by deafault, the `fetch` function makes uses a `GET` request method.
 		const resp = await fetch(`${serverAddress}/messages`);
@@ -180,20 +193,22 @@ async function fetchMessagesFromServer () {
 		console.error(e);
 		return;
 	}
-
+	
+	if(!data.length) return;
 	/**
-	* Contains all messages returned from the server that were not yet rendered.
-	* The ideia is that if the array of messages on the server is larger than the
-	* array of messages on the client, then that means some messages are new.
-	* Since the messages are placed in order on the array, you just have to get the
-	* last elements of the server message's array.
-	*/
+	 * Contains all messages returned from the server that were not yet rendered.
+	 * The ideia is that if the array of messages on the server is larger than the
+	 * array of messages on the client, then that means some messages are new.
+	 * Since the messages are placed in order on the array, you just have to get the
+	 * last elements of the server message's array.
+	 */
 	const unrenderedMessages = data.slice(renderedMessages.length);
-
+	
 	unrenderedMessages.forEach(newMessage => {
 		createMessageOnUI(newMessage);
 		renderedMessages.push(newMessage);
 	});
 }
 
+// Checa se há novas mensagens
 setInterval(fetchMessagesFromServer, 500);

@@ -1,4 +1,4 @@
-const colors = [
+module.exports = [
 	'black',
 	'gray',
 	'maroon',
@@ -59,7 +59,6 @@ const colors = [
 	'hotpink',
 	'indianred',
 	'indigo',
-	'ivory',
 	'khaki',
 	'lavender',
 	'lavenderblush',

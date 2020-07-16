@@ -1,4 +1,7 @@
-const adjectives = [
+module.exports = [
+	'corajoso',
+	'aventureiro',
+	'Não_adoravel',
 	'Defiant',
 	'Homeless',
 	'Adorable',
