@@ -53,8 +53,8 @@ let myself;
 
 	try {
 		const response =  await fetch(`${serverAddress}/user`, {
-			 								headers: { 'Content-Type': 'application/json' },
-										});
+			 					headers: { 'Content-Type': 'application/json' },
+		});
 										
 		const newMyself = await response.json();
 		localStorage.setItem('self-info', JSON.stringify(newMyself));
